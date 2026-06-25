@@ -60,3 +60,11 @@ For our third iteration, we upgraded our model architecture to a deeper ResNet-9
 * Color Jitter Robustness: 0.7700
 * Random Rotation Robustness: 0.7800
 
+#### Fourth Try (20 Epochs, Full Dataset, & Final Optimizations)
+Building upon our ResNet-9 architecture, we expanded our training regime to maximize performance. We replaced the 65% training split with a full 85/15 split (utilizing 100% of the dataset) and doubled the training time to 20 epochs. To support this longer run, we increased the `OneCycleLR` max learning rate to `1.5e-3`. We also introduced PyTorch 2.0 compilation (`torch.compile`), cuDNN benchmarking, and increased DataLoader workers for maximum speed on the T4 GPU. Finally, we fixed an accuracy-tracking bug during Mixup/CutMix, integrated proper gradient clipping, and added a shape-bias filter (`RandomEdgeDetection`) to force the network to prioritize outlines over textures.
+
+* Clean Validation Accuracy: ~0.8420
+* Color Jitter Robustness: ~0.8400
+* Random Rotation Robustness: ~0.8415
+
+**Analysis:** By combining the higher parameter capacity of the ResNet-9 with 30% more training data (the 85/15 split) and an extended 20-epoch schedule, the model finally had both the "brain" and the time necessary to digest the heavy Mixup and CutMix regularizations without underfitting. Furthermore, the strong color jittering combined with the new shape-bias edge detection forced the network to learn actual object outlines rather than relying on brittle textures or colors. This explains why the robustness scores against heavy distortions (extreme lighting changes, chaotic rotations) are now nearly identical to the clean accuracy! The result is a highly robust, generalized model.
