@@ -23,7 +23,7 @@ OUTPUT_WEIGHTS = current_dir / "weights.joblib"
 
 # --- Training Configurations ---
 BATCH_SIZE = 32
-EPOCHS = 20             
+EPOCHS = 12          
 LEARNING_RATE = 1e-3
 DATA_FRACTION = 1.0  # Train on 100% of the train_50 split (10,000 images total)
 
