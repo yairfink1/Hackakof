@@ -1,0 +1,16 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Datasets and splits
+project/dataset/train_50/
+project/dataset/val_10/
+project/dataset/reserve_40/
+project/dataset/validation/
+
+# IDE files
+.vscode/
+.idea/
+.gemini/
