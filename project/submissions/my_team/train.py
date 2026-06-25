@@ -87,14 +87,15 @@ def main():
     print(f"Training subset size: {len(train_dataset)} samples (Fraction: {DATA_FRACTION})")
     print(f"Validation subset size: {len(val_dataset)} samples")
 
-    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4, pin_memory=True)
-    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4, pin_memory=True)
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=2, pin_memory=True)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=2, pin_memory=True)
 
     # Instantiate model
     model = ModelArchitecture(num_classes=20).to(device, memory_format=torch.channels_last)
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-2)
+    scaler = torch.amp.GradScaler()
 
     best_val_acc = 0.0
     best_state_dict = None
@@ -111,10 +112,13 @@ def main():
             labels = labels.to(device)
 
             optimizer.zero_grad()
-            logits = model(images)
-            loss = criterion(logits, labels)
-            loss.backward()
-            optimizer.step()
+            with torch.autocast(device_type='cuda', dtype=torch.float16):
+                logits = model(images)
+                loss = criterion(logits, labels)
+            
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
 
             running_loss += loss.item() * images.size(0)
             preds = logits.argmax(dim=1)

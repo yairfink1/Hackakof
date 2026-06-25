@@ -18,9 +18,9 @@ Our first iteration uses a basic Convolutional Neural Network trained from scrat
 ### Experiments & Results
 
 #### First Try
-* Clean Validation Accuracy: [Place accuracy here]
-* Color Jitter Robustness: [Place accuracy here]
-* Random Rotation Robustness: [Place accuracy here]
+* Clean Validation Accuracy: 0.6210
+* Color Jitter Robustness: 0.6625
+* Random Rotation Robustness: 0.6400
 
 ---
 
