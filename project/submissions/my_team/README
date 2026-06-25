@@ -1,0 +1,28 @@
+Name1,Name2
+ID1,ID2
+
+### Overview
+This directory contains our team's code for the monkey classification task. The goal is to build a model that classifies images into one of 20 classes while remaining robust to background and environmental shifts.
+
+### First Try: Simple Custom CNN
+Our first iteration uses a basic Convolutional Neural Network trained from scratch.
+
+* **Model Architecture**:
+  * 4 convolutional layers (with batch normalization and max pooling) to extract image features.
+  * A classifier head (fully connected layers with dropout for regularization) to output prediction logits.
+* **Training Setup**:
+  * Trained for 12 epochs using the Adam optimizer and cross-entropy loss.
+  * Employs standard data augmentations (horizontal flips, random cropping, rotations, and color shifts) to help the model generalize beyond the training backgrounds.
+  * Validation accuracy is checked after each epoch, and the best model weights are saved.
+
+### Experiments & Results
+
+#### First Try
+* Clean Validation Accuracy: [Place accuracy here]
+* Color Jitter Robustness: [Place accuracy here]
+* Random Rotation Robustness: [Place accuracy here]
+
+---
+
+### Next Try
+* [Place details of the next iteration here]
