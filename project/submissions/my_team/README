@@ -1,16 +1,28 @@
 Name1,Name2
 ID1,ID2
 
-### Model Description
-A custom, lightweight Convolutional Neural Network (CNN) trained from scratch. 
-The architecture consists of:
-1. 4 Convolutional blocks (Conv2D -> BatchNorm2D -> ReLU -> MaxPool2D).
-2. An Adaptive Average Pooling layer.
-3. A fully connected classifier head with Dropout (p=0.3) for regularization.
+### Overview
+This directory contains our team's code for the monkey classification task. The goal is to build a model that classifies images into one of 20 classes while remaining robust to background and environmental shifts.
 
-### Manipulations and Robustness Experiments
-- **Baseline (No Augmentation)**: Trained on the full 50% split (10,000 images) for 3 epochs on CPU.
-  - Local Clean Accuracy: 57.15%
-  - Color Jitter Robustness: 57.25%
-  - Random Rotation Robustness: 58.75%
-- **Robust Training (Underway)**: Adding spatial and color transformations directly into the training data loader (RandomResizedCrop, RandomHorizontalFlip, RandomRotation, ColorJitter, RandomGrayscale, RandomErasing) to ensure background and lighting invariance.
+### First Try: Simple Custom CNN
+Our first iteration uses a basic Convolutional Neural Network trained from scratch.
+
+* **Model Architecture**:
+  * 4 convolutional layers (with batch normalization and max pooling) to extract image features.
+  * A classifier head (fully connected layers with dropout for regularization) to output prediction logits.
+* **Training Setup**:
+  * Trained for 12 epochs using the Adam optimizer and cross-entropy loss.
+  * Employs standard data augmentations (horizontal flips, random cropping, rotations, and color shifts) to help the model generalize beyond the training backgrounds.
+  * Validation accuracy is checked after each epoch, and the best model weights are saved.
+
+### Experiments & Results
+
+#### First Try
+* Clean Validation Accuracy: [Place accuracy here]
+* Color Jitter Robustness: [Place accuracy here]
+* Random Rotation Robustness: [Place accuracy here]
+
+---
+
+### Next Try
+* [Place details of the next iteration here]
