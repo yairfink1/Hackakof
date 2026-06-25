@@ -35,7 +35,7 @@ OUTPUT_WEIGHTS = current_dir / "weights.joblib"
 
 # --- Training Configurations ---
 BATCH_SIZE = 128
-EPOCHS = 30
+EPOCHS = 12
 LEARNING_RATE = 1e-3
 WEIGHT_DECAY = 1e-4
 DATA_FRACTION = 1.0  # Use all available training data
