@@ -48,7 +48,7 @@ DATA_FRACTION = 1.0  # Use all available training data
 # --- Mixup / CutMix Configuration ---
 MIXUP_ALPHA = 0.2       # Beta distribution parameter for Mixup
 CUTMIX_ALPHA = 1.0      # Beta distribution parameter for CutMix
-MIXUP_PROB = 0.3         # Probability of applying Mixup on a batch
+MIXUP_PROB = 0.2         # Probability of applying Mixup on a batch
 CUTMIX_PROB = 0.2        # Probability of applying CutMix on a batch
 
 # --- AugMix Configuration ---
@@ -56,7 +56,7 @@ AUGMIX_SEVERITY = 3      # Max severity of individual augmentation ops
 AUGMIX_WIDTH = 3         # Number of augmentation chains to mix
 AUGMIX_DEPTH = -1        # -1 means random depth (1-3) per chain
 AUGMIX_ALPHA_DIRICHLET = 1.0  # Dirichlet mixing weight
-JSD_LAMBDA = 12.0        # Weight for Jensen-Shannon consistency loss
+JSD_LAMBDA = 2.0         # Reduced from 12.0 to allow model to learn basics first
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
@@ -231,14 +231,12 @@ STANDARD_PREPROCESS = transforms.Compose([
 ])
 
 STANDARD_AUGMENTATIONS = transforms.Compose([
-    transforms.RandomRotation(30),
-    transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.15),
-    transforms.RandomGrayscale(p=0.15),
-    RandomEdgeDetection(p=0.08),  # Shape-bias!
-    transforms.RandomAffine(degrees=0, translate=(0.1, 0.1), scale=(0.9, 1.1), shear=10),
-    transforms.GaussianBlur(kernel_size=3, sigma=(0.1, 2.0)),
-    transforms.RandomPosterize(bits=4, p=0.1),
-    transforms.RandomSolarize(threshold=200, p=0.1),
+    # Cleaned up: Removed heavy distortions (Blur/Affine/Solarize) so the model can learn.
+    # Mixup, CutMix, and AugMix will provide the extreme robustness instead.
+    transforms.RandomRotation(15),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.05),
+    transforms.RandomGrayscale(p=0.05),
+    RandomEdgeDetection(p=0.05),  # Shape-bias!
 ])
 
 STANDARD_TO_TENSOR = transforms.Compose([
