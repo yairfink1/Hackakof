@@ -261,14 +261,25 @@ def main():
 
     print("-" * 70)
 
-    # Save to weights.joblib
+    # Save both uncompiled and compiled versions
+    OUTPUT_COMPILED = current_dir / "weights_compiled.joblib"
+    
+    state_dict_to_save = best_state_dict if best_state_dict is not None else model.cpu().state_dict()
+    
+    # Save the original (compiled) version
+    joblib.dump(state_dict_to_save, OUTPUT_COMPILED)
+    print(f"Saved compiled weights to {OUTPUT_COMPILED}")
+    
+    # Create uncompiled version
+    uncompiled_state_dict = {}
+    for k, v in state_dict_to_save.items():
+        new_key = k.replace("_orig_mod.", "") if k.startswith("_orig_mod.") else k
+        uncompiled_state_dict[new_key] = v
+        
+    joblib.dump(uncompiled_state_dict, OUTPUT_WEIGHTS)
+    print(f"Saved uncompiled weights to {OUTPUT_WEIGHTS}")
     if best_state_dict is not None:
-        joblib.dump(best_state_dict, OUTPUT_WEIGHTS)
-        print(f"Saved best weights with Val Acc: {best_val_acc:.4f} to {OUTPUT_WEIGHTS}")
-    else:
-        # Fallback
-        joblib.dump(model.cpu().state_dict(), OUTPUT_WEIGHTS)
-        print(f"Saved default weights to {OUTPUT_WEIGHTS}")
+        print(f"Best Val Acc: {best_val_acc:.4f}")
 
 
 if __name__ == "__main__":

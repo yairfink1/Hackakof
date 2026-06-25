@@ -98,14 +98,7 @@ def main():
     print("Loading model and weights...")
     model = ModelArchitecture(num_classes=20)
     state_dict = joblib.load(weights_path)
-    
-    # Handle weights saved from a compiled model
-    new_state_dict = {}
-    for k, v in state_dict.items():
-        new_key = k.replace("_orig_mod.", "") if k.startswith("_orig_mod.") else k
-        new_state_dict[new_key] = v
-        
-    model.load_state_dict(new_state_dict)
+    model.load_state_dict(state_dict)
     model = model.to(device)
 
     # Evaluate standard validation first for reference
@@ -113,7 +106,7 @@ def main():
     val_dataset = ImageNetSubset(project_root / "dataset", split="val_15", transform=transform)
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
     val_acc = evaluate_on_set(model, val_loader, device)
-    print(f"\n[Baseline] Val_10 Clean Accuracy: {val_acc:.4f}")
+    print(f"\n[Baseline] Val_15 Clean Accuracy: {val_acc:.4f}")
 
     # Evaluate color_jitter
     try:
