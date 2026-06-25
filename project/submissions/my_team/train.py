@@ -28,7 +28,7 @@ OUTPUT_WEIGHTS = current_dir / "weights.joblib"
 # --- Training Configurations ---
 BATCH_SIZE = 128
 EPOCHS = 20          
-LEARNING_RATE = 1e-3
+LEARNING_RATE = 1.2*(1e-3)
 DATA_FRACTION = 1.0  # Train on 100% of the train_65 split
 
 # --- Mixup / CutMix Configuration ---
@@ -137,8 +137,8 @@ def main():
     ])
 
     print("Loading datasets...")
-    full_train_dataset = ImageNetSubset(DATA_ROOT, split="train_65", transform=train_transform)
-    val_dataset = ImageNetSubset(DATA_ROOT, split="val_10", transform=val_transform)
+    full_train_dataset = ImageNetSubset(DATA_ROOT, split="train_85", transform=train_transform)
+    val_dataset = ImageNetSubset(DATA_ROOT, split="val_15", transform=val_transform)
 
     train_dataset = get_fraction_subset(full_train_dataset, fraction=DATA_FRACTION)
     print(f"Training subset size: {len(train_dataset)} samples (Fraction: {DATA_FRACTION})")
