@@ -28,7 +28,7 @@ OUTPUT_WEIGHTS = current_dir / "weights.joblib"
 # --- Training Configurations ---
 BATCH_SIZE = 128
 EPOCHS = 20          
-LEARNING_RATE = 1.5*(1e-3)
+LEARNING_RATE = 1e-3
 DATA_FRACTION = 1.0  # Train on 100% of the train_65 split
 
 # --- Mixup / CutMix Configuration ---
