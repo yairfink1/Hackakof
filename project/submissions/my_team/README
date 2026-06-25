@@ -15,6 +15,20 @@ Our first iteration uses a basic Convolutional Neural Network trained from scrat
   * Employs standard data augmentations (horizontal flips, random cropping, rotations, and color shifts) to help the model generalize beyond the training backgrounds.
   * Validation accuracy is checked after each epoch, and the best model weights are saved.
 
+### Second Try: Aggressive Robustness Pipeline
+For our second iteration, we focused entirely on improving the data pipeline to combat out-of-distribution visual manipulation (the "Shield" phase). We kept the simple CNN architecture to strictly measure the impact of our data augmentations.
+
+* **Advanced Augmentations (Phase 1)**:
+  * Implemented an aggressive `train_transform` pipeline including: Random Rotation (30 deg), heavy Color Jittering, Random Affine (scaling/shearing), Gaussian Blur, Random Posterize, Random Solarize, and Random Erasing.
+  * This specifically targets the unseen grading sets which test for color and spatial distortions.
+* **Mixup & CutMix (Phase 2)**:
+  * Injected **Mixup** (30% probability) and **CutMix** (20% probability) directly into the training loop.
+  * These state-of-the-art techniques blend images and labels, forcing the model to stop relying on background context and focus on structural shapes.
+* **Training Setup**:
+  * Added a `CosineAnnealingLR` scheduler for smoother convergence.
+  * Added `weight_decay` (1e-4) to prevent overfitting.
+  * Trained for 12 epochs on a Google Colab GPU.
+
 ### Experiments & Results
 
 #### First Try
@@ -22,7 +36,9 @@ Our first iteration uses a basic Convolutional Neural Network trained from scrat
 * Color Jitter Robustness: 0.6625
 * Random Rotation Robustness: 0.6400
 
----
+#### Second Try (Robust Augmentations on Toy CNN)
+* Clean Validation Accuracy: 0.5530
+* Color Jitter Robustness: 0.5450
+* Random Rotation Robustness: 0.5575
 
-### Next Try
-* [Place details of the next iteration here]
+**Analysis:** The accuracy *dropped* compared to the first try. This happens because heavy augmentations (Mixup, CutMix, aggressive distortions) act as extreme regularization. The simple 4-layer CNN from our first try lacks the architectural capacity (number of parameters) to learn from such chaotic, blended data in just 12 epochs. It mathematically underfits the data. To see the benefits of this "Shield", we need to combine it with a stronger "Brain".
