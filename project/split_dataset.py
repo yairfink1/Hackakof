@@ -16,13 +16,12 @@ def main():
         return
 
     # Define target split directories
-    train_65_dir = dataset_dir / "train_65"
-    val_10_dir = dataset_dir / "val_10"
-    reserve_25_dir = dataset_dir / "reserve_25"
+    train_85_dir = dataset_dir / "train_85"
+    val_15_dir = dataset_dir / "val_15"
     validation_dir = dataset_dir / "validation"  # Needed for evaluate.py
 
     # Clean existing splits if they exist to allow re-running
-    for d in [train_65_dir, val_10_dir, reserve_25_dir, validation_dir]:
+    for d in [train_85_dir, val_15_dir, validation_dir]:
         if d.exists():
             print(f"Removing existing directory: {d}")
             shutil.rmtree(d)
@@ -33,7 +32,6 @@ def main():
 
     total_train = 0
     total_val = 0
-    total_reserve = 0
 
     for class_path in sorted(classes):
         class_name = class_path.name
@@ -54,13 +52,12 @@ def main():
             print(f"Warning: No images found in {class_path}")
             continue
 
-        # Splits: 65% (650), 10% (100), 25% (250)
-        n_train = int(n_total * 0.65)
-        n_val = int(n_total * 0.1)
+        # Splits: 85% train, 15% val
+        n_train = int(n_total * 0.85)
+        n_val = n_total - n_train
         
         train_set = image_paths[:n_train]
-        val_set = image_paths[n_train:n_train + n_val]
-        reserve_set = image_paths[n_train + n_val:]
+        val_set = image_paths[n_train:]
 
         # Helper function to link images
         def link_images(src_list, target_sub_dir):
@@ -75,18 +72,16 @@ def main():
                     shutil.copy2(src_file, dst_file)
 
         # Link files to their respective split directories
-        link_images(train_set, train_65_dir / class_name)
-        link_images(val_set, val_10_dir / class_name)
+        link_images(train_set, train_85_dir / class_name)
+        link_images(val_set, val_15_dir / class_name)
         link_images(val_set, validation_dir / class_name)  # evaluate.py reads from dataset/validation
-        link_images(reserve_set, reserve_25_dir / class_name)
 
-        print(f"Class '{class_name}': {len(train_set)} train, {len(val_set)} val, {len(reserve_set)} reserve.")
+        print(f"Class '{class_name}': {len(train_set)} train, {len(val_set)} val.")
         total_train += len(train_set)
         total_val += len(val_set)
-        total_reserve += len(reserve_set)
 
     print("\nSplitting complete!")
-    print(f"Total linked: {total_train} train_65, {total_val} val_10, {total_reserve} reserve_25.")
+    print(f"Total linked: {total_train} train_85, {total_val} val_15.")
 
 if __name__ == "__main__":
     main()

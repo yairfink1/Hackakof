@@ -29,6 +29,18 @@ For our second iteration, we focused entirely on improving the data pipeline to 
   * Added `weight_decay` (1e-4) to prevent overfitting.
   * Trained for 12 epochs on a Google Colab GPU.
 
+### Third Try: ResNet-9 with Robust Augmentations
+For our third iteration, we upgraded our model architecture to a deeper ResNet-9 ("Brain" upgrade) while keeping the robust augmentation pipeline. ResNet-9 is deeper and has residual connections, giving it the capacity to actually learn through the heavy regularization.
+
+* **Model Architecture**:
+  * Lightweight ResNet-9 architecture (from `model.py`).
+  * Residual blocks help gradients flow and allow deeper feature extraction.
+* **Training Setup**:
+  * Retained the Mixup, CutMix, and robust transforms from the second try.
+  * VRAM optimizations: Uses mixed precision training (AMP via `torch.autocast` and `GradScaler`) to heavily reduce memory footprint and speed up operations.
+  * Set `num_workers=2` in DataLoaders for reliable background preprocessing without bottlenecking.
+  * Trained using `AdamW` and `OneCycleLR`.
+
 ### Experiments & Results
 
 #### First Try
@@ -42,3 +54,9 @@ For our second iteration, we focused entirely on improving the data pipeline to 
 * Random Rotation Robustness: 0.5575
 
 **Analysis:** The accuracy *dropped* compared to the first try. This happens because heavy augmentations (Mixup, CutMix, aggressive distortions) act as extreme regularization. The simple 4-layer CNN from our first try lacks the architectural capacity (number of parameters) to learn from such chaotic, blended data in just 12 epochs. It mathematically underfits the data. To see the benefits of this "Shield", we need to combine it with a stronger "Brain".
+
+#### Third Try (ResNet-9 + Robust Augmentations)
+* Clean Validation Accuracy: 0.7615
+* Color Jitter Robustness: 0.7700
+* Random Rotation Robustness: 0.7800
+

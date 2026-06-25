@@ -7,7 +7,9 @@ __pycache__/
 # Datasets and splits
 project/dataset/train_50/
 project/dataset/train_65/
+project/dataset/train_85/
 project/dataset/val_10/
+project/dataset/val_15/
 project/dataset/reserve_40/
 project/dataset/reserve_25/
 project/dataset/validation/
