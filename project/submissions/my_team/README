@@ -1,8 +1,8 @@
-Name1,Name2
-ID1,ID2
+Yuval Levi, Aylon Moyal, Yair Fink, Shay Kammon
+215671306,329596969,330803859,214729527
 
 ### Overview
-This directory contains our team's code for the monkey classification task. The goal is to build a model that classifies images into one of 20 classes while remaining robust to background and environmental shifts.
+This directory contains our team's code for the classification task. The goal is to build a model that classifies images into one of 20 classes while remaining robust to background and environmental shifts. It describes our progress throughout the mission.
 
 ### First Try: Simple Custom CNN
 Our first iteration uses a basic Convolutional Neural Network trained from scratch.
@@ -16,10 +16,10 @@ Our first iteration uses a basic Convolutional Neural Network trained from scrat
   * Validation accuracy is checked after each epoch, and the best model weights are saved.
 
 ### Second Try: Aggressive Robustness Pipeline
-For our second iteration, we focused entirely on improving the data pipeline to combat out-of-distribution visual manipulation (the "Shield" phase). We kept the simple CNN architecture to strictly measure the impact of our data augmentations.
+For our second iteration, we focused entirely on improving the augmentations so that our model will learn to generalize more. We kept the simple CNN architecture to strictly measure the impact of our data augmentations.
 
 * **Advanced Augmentations (Phase 1)**:
-  * Implemented an aggressive `train_transform` pipeline including: Random Rotation (30 deg), heavy Color Jittering, Random Affine (scaling/shearing), Gaussian Blur, Random Posterize, Random Solarize, and Random Erasing.
+  * Implemented an aggressive `train_transform` function including: Random Rotation (30 deg), heavy Color Jittering, Random Affine (scaling/shearing), Gaussian Blur, Random Posterize, Random Solarize, and Random Erasing.
   * This specifically targets the unseen grading sets which test for color and spatial distortions.
 * **Mixup & CutMix (Phase 2)**:
   * Injected **Mixup** (30% probability) and **CutMix** (20% probability) directly into the training loop.
@@ -30,16 +30,19 @@ For our second iteration, we focused entirely on improving the data pipeline to 
   * Trained for 12 epochs on a Google Colab GPU.
 
 ### Third Try: ResNet-9 with Robust Augmentations
-For our third iteration, we upgraded our model architecture to a deeper ResNet-9 ("Brain" upgrade) while keeping the robust augmentation pipeline. ResNet-9 is deeper and has residual connections, giving it the capacity to actually learn through the heavy regularization.
+For our third iteration, we upgraded our model architecture to a deeper ResNet-9 while keeping the augmentation changes. ResNet-9 is deeper and has residual connections, giving it the capacity to actually learn through the heavy regularization.
 
 * **Model Architecture**:
-  * Lightweight ResNet-9 architecture (from `model.py`).
+  * Lightweight ResNet-9 architecture.
   * Residual blocks help gradients flow and allow deeper feature extraction.
 * **Training Setup**:
   * Retained the Mixup, CutMix, and robust transforms from the second try.
-  * VRAM optimizations: Uses mixed precision training (AMP via `torch.autocast` and `GradScaler`) to heavily reduce memory footprint and speed up operations.
-  * Set `num_workers=2` in DataLoaders for reliable background preprocessing without bottlenecking.
-  * Trained using `AdamW` and `OneCycleLR`.
+  * Increased the trainig split to 65% to learn on more data - while lowering to 10 epochs to test if these new heavy upgrades improve the model.
+  * Set `num_workers=2` in the pipeline for reliable background preprocessing without bottlenecking.
+  * Trained using `AdamW` and `OneCycleLR` instead of `CosineAnnealingLR`.
+
+#### Final Try (20 Epochs, Full Dataset, & Final Optimizations)
+Building upon our ResNet-9 architecture, we expanded our training regime to maximize performance. We replaced the 65% training split with a full 85/15 split (utilizing 100% of the dataset) and doubled the training time to 20 epochs. To support this longer run, we increased the `OneCycleLR` max learning rate to `1.2e-3`. On top of that we added a shape-bias filter (`RandomEdgeDetection`) to force the network to prioritize outlines over textures.
 
 ### Experiments & Results
 
@@ -60,12 +63,10 @@ For our third iteration, we upgraded our model architecture to a deeper ResNet-9
 * Color Jitter Robustness: 0.7700
 * Random Rotation Robustness: 0.7800
 
-#### Fourth Try (20 Epochs, Full Dataset, & Final Optimizations)
-Building upon our ResNet-9 architecture, we expanded our training regime to maximize performance. We replaced the 65% training split with a full 85/15 split (utilizing 100% of the dataset) and doubled the training time to 20 epochs. To support this longer run, we increased the `OneCycleLR` max learning rate to `1.5e-3`. We also introduced PyTorch 2.0 compilation (`torch.compile`) to make it run faster on the more epochs and data. On top of that we added a shape-bias filter (`RandomEdgeDetection`) to force the network to prioritize outlines over textures.
-
-* Clean Validation Accuracy: ~0.8420
-* Color Jitter Robustness: ~0.8400
-* Random Rotation Robustness: ~0.8415
+#### Final Results
+* Clean Validation Accuracy: 
+* Color Jitter Robustness: 
+* Random Rotation Robustness: 
 
 **Analysis:** By combining the higher parameter capacity of the ResNet-9 with 30% more training data (the 85/15 split) and an extended 20-epoch schedule, the model finally had both the "brain" and the time necessary to digest the heavy Mixup and CutMix regularizations without underfitting. Furthermore, the strong color jittering combined with the new shape-bias edge detection forced the network to learn actual object outlines rather than relying on brittle textures or colors. This explains why the robustness scores against heavy distortions (extreme lighting changes, chaotic rotations) are now nearly identical to the clean accuracy! The result is a highly robust, generalized model.
 
@@ -90,3 +91,5 @@ Epoch 17/20 | LR: 0.000130 | Train Loss: 1.4916, Acc: 0.7349 | Val Loss: 1.1121,
 Epoch 18/20 | LR: 0.000059 | Train Loss: 1.4369, Acc: 0.7540 | Val Loss: 1.0966, Acc: 0.8413 ★
 Epoch 19/20 | LR: 0.000015 | Train Loss: 1.4108, Acc: 0.7742 | Val Loss: 1.0792, Acc: 0.8473 ★
 Epoch 20/20 | LR: 0.000000 | Train Loss: 1.4274, Acc: 0.7694 | Val Loss: 1.0777, Acc: 0.8500 ★
+
+As we can see here - the LR went to 0 because we have reached a sort of convergence over these 20 epochs. Therefore, increasing the epoch amount wouldn't have benefitted us much in increasing the final accuracy.
