@@ -46,6 +46,7 @@ class ModelArchitecture(nn.Module):
         self.pool = nn.AdaptiveAvgPool2d(1)
         self.classifier = nn.Sequential(
             nn.Flatten(),
+            nn.Dropout(0.3),
             nn.Linear(512, num_classes)
         )
         

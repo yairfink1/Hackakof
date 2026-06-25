@@ -16,13 +16,13 @@ def main():
         return
 
     # Define target split directories
-    train_50_dir = dataset_dir / "train_50"
+    train_65_dir = dataset_dir / "train_65"
     val_10_dir = dataset_dir / "val_10"
-    reserve_40_dir = dataset_dir / "reserve_40"
+    reserve_25_dir = dataset_dir / "reserve_25"
     validation_dir = dataset_dir / "validation"  # Needed for evaluate.py
 
     # Clean existing splits if they exist to allow re-running
-    for d in [train_50_dir, val_10_dir, reserve_40_dir, validation_dir]:
+    for d in [train_65_dir, val_10_dir, reserve_25_dir, validation_dir]:
         if d.exists():
             print(f"Removing existing directory: {d}")
             shutil.rmtree(d)
@@ -54,8 +54,8 @@ def main():
             print(f"Warning: No images found in {class_path}")
             continue
 
-        # Splits: 50% (500), 10% (100), 40% (400)
-        n_train = int(n_total * 0.5)
+        # Splits: 65% (650), 10% (100), 25% (250)
+        n_train = int(n_total * 0.65)
         n_val = int(n_total * 0.1)
         
         train_set = image_paths[:n_train]
@@ -75,10 +75,10 @@ def main():
                     shutil.copy2(src_file, dst_file)
 
         # Link files to their respective split directories
-        link_images(train_set, train_50_dir / class_name)
+        link_images(train_set, train_65_dir / class_name)
         link_images(val_set, val_10_dir / class_name)
         link_images(val_set, validation_dir / class_name)  # evaluate.py reads from dataset/validation
-        link_images(reserve_set, reserve_40_dir / class_name)
+        link_images(reserve_set, reserve_25_dir / class_name)
 
         print(f"Class '{class_name}': {len(train_set)} train, {len(val_set)} val, {len(reserve_set)} reserve.")
         total_train += len(train_set)
@@ -86,7 +86,7 @@ def main():
         total_reserve += len(reserve_set)
 
     print("\nSplitting complete!")
-    print(f"Total linked: {total_train} train_50, {total_val} val_10, {total_reserve} reserve_40.")
+    print(f"Total linked: {total_train} train_65, {total_val} val_10, {total_reserve} reserve_25.")
 
 if __name__ == "__main__":
     main()

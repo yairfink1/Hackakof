@@ -23,9 +23,9 @@ OUTPUT_WEIGHTS = current_dir / "weights.joblib"
 
 # --- Training Configurations ---
 BATCH_SIZE = 128
-EPOCHS = 12          
+EPOCHS = 10          
 LEARNING_RATE = 1e-3
-DATA_FRACTION = 1.0  # Train on 100% of the train_50 split (10,000 images total)
+DATA_FRACTION = 1.0  # Train on 100% of the train_65 split (13,000 images total)
 
 
 def get_fraction_subset(dataset, fraction=0.05, seed=42):
@@ -76,8 +76,8 @@ def main():
     ])
 
     print("Loading datasets...")
-    # Loader reads from dataset/train_50/
-    full_train_dataset = ImageNetSubset(DATA_ROOT, split="train_50", transform=train_transform)
+    # Loader reads from dataset/train_65/
+    full_train_dataset = ImageNetSubset(DATA_ROOT, split="train_65", transform=train_transform)
 
     # Loader reads from dataset/val_10/
     val_dataset = ImageNetSubset(DATA_ROOT, split="val_10", transform=val_transform)
@@ -93,9 +93,10 @@ def main():
     # Instantiate model
     model = ModelArchitecture(num_classes=20).to(device, memory_format=torch.channels_last)
 
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.CrossEntropyLoss(label_smoothing=0.1)
     optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-2)
     scaler = torch.amp.GradScaler()
+    scheduler = torch.optim.lr_scheduler.OneCycleLR(optimizer, max_lr=LEARNING_RATE, steps_per_epoch=len(train_loader), epochs=EPOCHS)
 
     best_val_acc = 0.0
     best_state_dict = None
@@ -119,6 +120,7 @@ def main():
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()
+            scheduler.step()
 
             running_loss += loss.item() * images.size(0)
             preds = logits.argmax(dim=1)
