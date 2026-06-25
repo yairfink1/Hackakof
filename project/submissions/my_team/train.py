@@ -22,7 +22,7 @@ DATA_ROOT = project_root / "dataset"
 OUTPUT_WEIGHTS = current_dir / "weights.joblib"
 
 # --- Training Configurations ---
-BATCH_SIZE = 32
+BATCH_SIZE = 128
 EPOCHS = 12          
 LEARNING_RATE = 1e-3
 DATA_FRACTION = 1.0  # Train on 100% of the train_50 split (10,000 images total)
@@ -87,11 +87,11 @@ def main():
     print(f"Training subset size: {len(train_dataset)} samples (Fraction: {DATA_FRACTION})")
     print(f"Validation subset size: {len(val_dataset)} samples")
 
-    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=0)
-    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=0)
+    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True, num_workers=4, pin_memory=True)
+    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False, num_workers=4, pin_memory=True)
 
     # Instantiate model
-    model = ModelArchitecture(num_classes=20).to(device)
+    model = ModelArchitecture(num_classes=20).to(device, memory_format=torch.channels_last)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
@@ -107,7 +107,8 @@ def main():
         total_train = 0
 
         for images, labels in train_loader:
-            images, labels = images.to(device), labels.to(device)
+            images = images.to(device, memory_format=torch.channels_last)
+            labels = labels.to(device)
 
             optimizer.zero_grad()
             logits = model(images)
@@ -131,7 +132,8 @@ def main():
 
         with torch.no_grad():
             for images, labels in val_loader:
-                images, labels = images.to(device), labels.to(device)
+                images = images.to(device, memory_format=torch.channels_last)
+                labels = labels.to(device)
                 logits = model(images)
                 loss = criterion(logits, labels)
                 val_loss += loss.item() * images.size(0)
