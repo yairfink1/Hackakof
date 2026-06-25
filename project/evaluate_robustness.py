@@ -110,7 +110,7 @@ def main():
 
     # Evaluate standard validation first for reference
     from base_model import ImageNetSubset
-    val_dataset = ImageNetSubset(project_root / "dataset", split="val_10", transform=transform)
+    val_dataset = ImageNetSubset(project_root / "dataset", split="val_15", transform=transform)
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
     val_acc = evaluate_on_set(model, val_loader, device)
     print(f"\n[Baseline] Val_10 Clean Accuracy: {val_acc:.4f}")
